@@ -1,86 +1,38 @@
-class Location:
-    def __init__(self, name, description):
+class Player:
+    def __init__(self, name):
         self.name = name
-        self.description = description
-        self.exits = {}
-        self.npcs = []
-        self.items = []
-        self.visited = False
+        self.health = 100
+        self.max_health = 100
+        self.inventory = []
+        self.location = "forest_entrance"
+        self.experience = 0
 
-    def add_exit(self, direction, location):
-        self.exits[direction] = location
+    def take_damage(self, amount):
+        self.health -= amount
+        if self.health < 0:
+            self.health = 0
+
+    def heal(self, amount):
+        self.health += amount
+        if self.health > self.max_health:
+            self.health = self.max_health
 
     def add_item(self, item):
-        self.items.append(item)
+        self.inventory.append(item)
+        print(f"✓ Added {item} to inventory")
 
-    def add_npc(self, npc):
-        self.npcs.append(npc)
+    def remove_item(self, item):
+        if item in self.inventory:
+            self.inventory.remove(item)
+            return True
+        return False
 
-    def display(self):
-        text = f"\n{'='*50}\n{self.name}\n{'='*50}\n{self.description}\n"
-        
-        if self.items:
-            text += f"\nItems here: {', '.join(self.items)}\n"
-        
-        if self.npcs:
-            text += f"People: {', '.join([npc.name for npc in self.npcs])}\n"
-        
-        if self.exits:
-            text += f"\nExits: {', '.join(self.exits.keys())}\n"
-        
-        return text
+    def has_item(self, item):
+        return item in self.inventory
 
-class GameWorld:
-    def __init__(self):
-        self.locations = {}
-        self._setup_world()
+    def gain_experience(self, amount):
+        self.experience += amount
 
-    def _setup_world(self):
-        # Create locations
-        forest_entrance = Location(
-            "Forest Entrance",
-            "You stand at the edge of a dense forest. Tall trees surround you, and the sound\nof birds echoes through the air. The path ahead is dark and mysterious."
-        )
+    def status(self):
+        return f"\n=== {self.name} ===\nHealth: {self.health}/{self.max_health}\nExperience: {self.experience}\nInventory: {', '.join(self.inventory) if self.inventory else 'Empty'}"
         
-        deep_forest = Location(
-            "Deep Forest",
-            "The trees are thicker here. You notice strange markings on some trunks.\nThe air feels cold and eerie."
-        )
-        
-        old_cabin = Location(
-            "Old Cabin",
-            "A weathered wooden cabin stands before you. The door creaks in the wind.\nSmoke wisps from the chimney - someone might be home."
-        )
-        
-        mountain_path = Location(
-            "Mountain Path",
-            "You've reached a narrow path up the mountain. The view below is breathtaking.\nYou can see the entire forest from here."
-        )
-        
-        # Connect locations
-        forest_entrance.add_exit("north", deep_forest)
-        forest_entrance.add_exit("east", mountain_path)
-        
-        deep_forest.add_exit("south", forest_entrance)
-        deep_forest.add_exit("west", old_cabin)
-        
-        old_cabin.add_exit("east", deep_forest)
-        
-        mountain_path.add_exit("west", forest_entrance)
-        
-        # Add items
-        forest_entrance.add_item("rusty_key")
-        deep_forest.add_item("healing_potion")
-        mountain_path.add_item("ancient_map")
-        
-        # Store locations
-        self.locations = {
-            "forest_entrance": forest_entrance,
-            "deep_forest": deep_forest,
-            "old_cabin": old_cabin,
-            "mountain_path": mountain_path
-        }
-
-    def get_location(self, location_id):
-        return self.locations.get(location_id)
-      
